@@ -1,74 +1,111 @@
-Este projeto consiste em um sistema simples de **Monitoramento de Teclas (Keylogger)** composto por um cliente que captura as entradas do teclado e um servidor Flask que recebe e exibe esses dados.
+Este guia apresenta uma estrutura detalhada para o seu arquivo `README.md`, organizando as informações dos arquivos fornecidos para que qualquer pessoa (ou você mesmo no futuro) entenda como o sistema de monitoramento funciona, desde o script local até a hospedagem na nuvem.
 
 ---
 
-# ⌨️ Keylogger Client-Server System
+# 📋 Documentação do Projeto: Sistema de Monitoramento Remoto
 
-Este repositório contém uma ferramenta de monitoramento educacional para captura de teclas em tempo real com envio para um servidor centralizado via requisições HTTP POST.
+Este projeto consiste em um sistema de captura de teclas (**Keylogger**) que envia os dados em tempo real para um servidor **Flask** hospedado na nuvem (Render).
 
-## 📂 Estrutura do Projeto
+## 🏗️ Estrutura do Projeto
 
-* **`flask.py`**: O servidor backend que recebe os logs e os exibe no console.
-* **`keylogger.py`**: O script Python cliente que captura o teclado e envia os dados.
-* **`key.bat`**: Arquivo executável Windows para instalar dependências e iniciar o cliente automaticamente.
+* **`keylogger.py`**: O script cliente que captura as teclas e gerencia o envio assíncrono para o servidor.
+* 
+**`app.py`**: O servidor web (API) que recebe e exibe os logs.
+
+
+* 
+**`requirements.txt`**: Lista de dependências necessárias para o servidor rodar no ambiente de produção.
+
+
+* 
+**`key.bat`**: Script de automação para Windows que instala as bibliotecas e inicia o monitoramento local.
 
 
 
 ---
 
-## 🚀 Passo a Passo de Configuração
+## 🚀 Como Configurar o Servidor (Nuvem)
 
-### 1. Preparação do Ambiente
+Para manter o monitoramento ativo 24h por dia, recomenda-se o uso da plataforma **Render**.
 
-Certifique-se de ter o **Python 3.x** instalado em sua máquina.
+### 1. Preparação
 
-### 2. Configuração do Servidor (Onde os dados chegam)
+O servidor utiliza **Flask** para a rota de recebimento e **Gunicorn** como servidor HTTP de produção.
 
-O servidor deve ser iniciado **antes** do cliente para que possa escutar as conexões.
+* 
+**Arquivo de dependências**: `requirements.txt` deve conter `flask` e `gunicorn`.
 
-1. Abra um terminal ou CMD na pasta do projeto.
-2. Instale o Flask caso não o tenha:
-```bash
-pip install flask
+
+* 
+**Porta dinâmica**: O servidor está configurado para ler a porta da variável de ambiente `PORT`, garantindo compatibilidade com a nuvem.
+
+
+
+### 2. Deploy no Render
+
+1. Suba os arquivos `app.py` e `requirements.txt` para um repositório no GitHub.
+
+
+2. No painel do Render, crie um novo **Web Service** conectado ao seu repositório.
+
+
+3. 
+**Comando de Inicialização (Start Command)**: `gunicorn app:app`.
+
+
+4. Copie a URL gerada (ex: `https://seu-app.onrender.com`).
+
+
+
+---
+
+## 💻 Como Configurar o Cliente (`keylogger.py`)
+
+O cliente captura as teclas e utiliza uma **Thread** separada para enviar os dados, garantindo que o programa não trave caso a internet oscile ou o servidor demore a responder.
+
+### 1. Configuração de URL
+
+No topo do arquivo `keylogger.py`, atualize a variável global:
+
+```python
+SERVER_URL = "https://sua-url-aqui.onrender.com/receber_dados"
 
 ```
 
 
-3. Inicie o servidor:
-```bash
-python flask.py
 
-```
+### 2. Execução Rápida (Windows)
 
+Basta executar o arquivo `key.bat`. Ele realizará os seguintes passos automaticamente:
 
-4. O console exibirá: `--- SERVIDOR AGUARDANDO DADOS ---`. O servidor ficará rodando no endereço `http://0.0.0.0:5000`.
-
-### 3. Configuração do Cliente (Onde as teclas são capturadas)
-
-Existem duas formas de iniciar o cliente:
-
-* **Via Arquivo BAT (Recomendado no Windows):**
-Basta dar um duplo clique em `key.bat`. Ele tentará instalar as bibliotecas `pynput` e `requests` automaticamente e iniciará o monitoramento.
+* Instala as bibliotecas `pynput` e `requests` silenciosamente.
 
 
-* **Via Python Manualmente:**
-1. Instale as bibliotecas: `pip install pynput requests`.
-2. Execute: `python keylogger.py`.
+* Inicia o script de monitoramento.
 
 
 
 ---
 
----
+## 🛠️ Detalhes Técnicos do Cliente
 
-## 🛠️ Detalhes Técnicos
-
-| Componente | Função |
+| Recurso | Descrição |
 | --- | --- |
-| **Captura** | Utiliza a biblioteca `pynput` para ouvir eventos do teclado. |
-| **Buffer** | As teclas são acumuladas localmente e enviadas em intervalos para evitar sobrecarga de rede. |
-| **Envio** | O envio é feito via `threading` (em segundo plano) para não travar a captura enquanto comunica com o servidor. |
-| **Servidor** | O Flask recebe os dados via rota `/receber_dados` e imprime no console com carimbo de data/hora. |
+| **Captura** | Utiliza a biblioteca `pynput` para escutar eventos do teclado. |
+| **Buffer** | Armazena as teclas em uma variável global (`buffer_nuvem`) para evitar perda de dados. |
+| **Envio Assíncrono** | Uma thread secundária tenta enviar os dados a cada 5 segundos. |
+| **Tratamento de Erros** | Se o servidor estiver "dormindo" (comum no plano gratuito do Render), o script aguarda sem interromper a captura. |
 
-> [!IMPORTANT]
-> **Aviso Ético:** Este software deve ser utilizado exclusivamente para fins educacionais ou de diagnóstico em máquinas de sua propriedade. O monitoramento de terceiros sem autorização expressa é ilegal e antiético.
+---
+
+## 🛡️ Considerações de Segurança e Persistência
+
+* **Autenticação**: Atualmente, a URL é pública. É recomendável adicionar uma **Chave de API** nos headers para validar a origem dos dados.
+
+
+* **Armazenamento**: O servidor atual apenas imprime os logs no console do Render. Para persistência a longo prazo, deve-se integrar um banco de dados como **MongoDB** ou **Supabase**.
+
+
+* 
+**Limitação da Nuvem**: No plano gratuito do Render, a instância pode demorar alguns segundos para "acordar" após períodos de inatividade.
+
