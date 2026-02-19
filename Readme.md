@@ -1,6 +1,3 @@
-Este guia apresenta uma estrutura detalhada para o seu arquivo `README.md`, organizando as informações dos arquivos fornecidos para que qualquer pessoa (ou você mesmo no futuro) entenda como o sistema de monitoramento funciona, desde o script local até a hospedagem na nuvem.
-
----
 
 # 📋 Documentação do Projeto: Sistema de Monitoramento Remoto
 
