@@ -86,7 +86,7 @@ Basta executar o arquivo `key.bat`. Ele realizará os seguintes passos automatic
 | --- | --- |
 | **Captura** | Utiliza a biblioteca `pynput` para escutar eventos do teclado. |
 | **Buffer** | Armazena as teclas em uma variável global (`buffer_nuvem`) para evitar perda de dados. |
-| **Envio Assíncrono** | Uma thread secundária tenta enviar os dados a cada 5 segundos. |
+| **Envio Assíncrono** | Uma thread secundária tenta enviar os dados a cada X segundos. |
 | **Tratamento de Erros** | Se o servidor estiver "dormindo" (comum no plano gratuito do Render), o script aguarda sem interromper a captura. |
 
 ---
